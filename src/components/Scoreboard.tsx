@@ -37,6 +37,10 @@ export function Scoreboard({
             {player.name}
             {player.isHost && <span className="tag">isäntä</span>}
             {player.id === you && <span className="tag tag-you">sinä</span>}
+            {/* Only populated for players allowed to watch — see protocol. */}
+            {player.finishedAt === null && !player.surrendered && player.current && (
+              <small className="whereabouts">nyt: {player.current}</small>
+            )}
           </span>
           <span className="score">{status(player)}</span>
         </li>

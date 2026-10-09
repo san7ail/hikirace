@@ -30,6 +30,13 @@ Opponents' click counts and finishing times are live, but **their routes stay
 hidden until the race is over** — broadcasting them mid-race would just hand
 everyone the answer.
 
+Once you finish, that restriction lifts for you alone: the standings start
+showing which article each straggler is standing on, updating as they move.
+You cannot use it to win a race you have already won, and watching someone
+flail two clicks from the target is the best part. Players still racing see
+nothing extra — the server builds a separate view per recipient rather than
+broadcasting one shared snapshot.
+
 A player who drops out keeps their slot and score and can reconnect; newcomers
 can't join a race that has already started, and the host role moves on if the
 host leaves.

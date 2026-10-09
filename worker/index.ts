@@ -22,6 +22,7 @@ interface Player {
   finishedAt: number | null
   surrendered: boolean
   path: string[]
+  current: string | null
 }
 
 interface Stored {
@@ -106,6 +107,7 @@ export class LobbyRoom extends DurableObject<Env> {
         finishedAt: null,
         surrendered: false,
         path: [],
+        current: null,
       }
     }
     if (!this.data.hostId || !this.data.players[this.data.hostId]) {
@@ -117,7 +119,7 @@ export class LobbyRoom extends DurableObject<Env> {
     // Hibernation keeps the lobby free of idle charges between races.
     this.ctx.acceptWebSocket(pair[1], [id])
 
-    const welcome: ServerMessage = { type: 'welcome', you: id, lobby: this.view() }
+    const welcome: ServerMessage = { type: 'welcome', you: id, lobby: this.view(id) }
     pair[1].send(JSON.stringify(welcome))
     this.broadcast({ type: 'state', lobby: this.view() }, id)
 
@@ -160,6 +162,7 @@ export class LobbyRoom extends DurableObject<Env> {
           p.finishedAt = null
           p.surrendered = false
           p.path = []
+          p.current = this.data.start
         }
         await this.save()
         this.broadcast({ type: 'go', start: this.data.start, target: this.data.target })
@@ -170,6 +173,7 @@ export class LobbyRoom extends DurableObject<Env> {
       case 'progress': {
         if (this.data.phase !== 'racing') return
         player.clicks = Math.max(0, Math.min(9999, Math.floor(msg.clicks)))
+        player.current = String(msg.current ?? '').slice(0, 200) || null
         break
       }
 
@@ -178,6 +182,7 @@ export class LobbyRoom extends DurableObject<Env> {
         player.clicks = Math.max(0, Math.floor(msg.clicks))
         player.finishedAt = Math.max(0, Math.floor(msg.durationMs))
         player.path = msg.path.slice(0, 500).map((t) => String(t).slice(0, 200))
+        player.current = player.path.at(-1) ?? player.current
         this.settleIfDone()
         break
       }
@@ -200,6 +205,7 @@ export class LobbyRoom extends DurableObject<Env> {
           p.finishedAt = null
           p.surrendered = false
           p.path = []
+          p.current = null
         }
         break
       }
@@ -242,9 +248,17 @@ export class LobbyRoom extends DurableObject<Env> {
       .filter(Boolean)
   }
 
-  private view(): LobbyView {
+  /**
+   * @param forId who is asking. A player who has already finished (or the
+   *   whole room, once the race is over) may watch where everyone else is;
+   *   anyone still racing sees only click counts.
+   */
+  private view(forId?: string): LobbyView {
     const connected = new Set(this.connectedIds())
     const revealPaths = this.data.phase === 'results'
+    const asker = forId ? this.data.players[forId] : undefined
+    const mayWatch =
+      revealPaths || Boolean(asker && (asker.finishedAt !== null || asker.surrendered))
 
     const players: PlayerView[] = Object.values(this.data.players)
       .sort((a, b) => a.joinedAt - b.joinedAt)
@@ -257,6 +271,8 @@ export class LobbyRoom extends DurableObject<Env> {
         finishedAt: p.finishedAt,
         surrendered: p.surrendered,
         path: revealPaths ? p.path : null,
+        // You can always see where you are yourself.
+        current: mayWatch || p.id === forId ? p.current : null,
       }))
 
     return {
@@ -269,9 +285,14 @@ export class LobbyRoom extends DurableObject<Env> {
   }
 
   private broadcast(message: ServerMessage, exceptId?: string) {
-    const payload = JSON.stringify(message)
     for (const socket of this.ctx.getWebSockets()) {
-      if (exceptId && this.ctx.getTags(socket)[0] === exceptId) continue
+      const id = this.ctx.getTags(socket)[0]
+      if (exceptId && id === exceptId) continue
+      // State is rebuilt per recipient: spectating rights differ per player.
+      const payload =
+        message.type === 'state'
+          ? JSON.stringify({ type: 'state', lobby: this.view(id) } satisfies ServerMessage)
+          : JSON.stringify(message)
       try {
         socket.send(payload)
       } catch {

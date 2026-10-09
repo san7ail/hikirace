@@ -15,7 +15,7 @@ interface Props {
   /** Present only in a multiplayer race. */
   opponents?: PlayerView[]
   you?: string
-  onProgress?: (clicks: number) => void
+  onProgress?: (clicks: number, current: string) => void
 }
 
 export function RaceScreen({ start, target, onFinish, opponents, you, onProgress }: Props) {
@@ -61,7 +61,7 @@ export function RaceScreen({ start, target, onFinish, opponents, you, onProgress
           const nextPath = [...pathRef.current, { title: next.title, at }]
           pathRef.current = nextPath
           setPath(nextPath)
-          onProgressRef.current?.(nextPath.length - 1)
+          onProgressRef.current?.(nextPath.length - 1, next.title)
 
           // MediaWiki has already followed redirects, so landing on
           // "Urho Kekkonen" counts as reaching "Urho Kaleva Kekkonen".

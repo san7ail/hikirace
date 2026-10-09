@@ -523,3 +523,10 @@ input { font: inherit; }
   .race-field { top: auto; position: static; padding: 10px 14px; }
   .lobby-code { font-size: 30px; }
 }
+
+.whereabouts {
+  display: block;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--muted);
+}

@@ -130,7 +130,7 @@ export default function App() {
   )
 
   const reportProgress = useCallback(
-    (clicks: number) => sendToLobby({ type: 'progress', clicks }),
+    (clicks: number, current: string) => sendToLobby({ type: 'progress', clicks, current }),
     [sendToLobby],
   )
 

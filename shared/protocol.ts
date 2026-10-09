@@ -17,6 +17,12 @@ export interface PlayerView {
    * during a race it would hand opponents a ready-made answer.
    */
   path: string[] | null
+  /**
+   * The article this player is standing on. Sent only to players who have
+   * already finished or surrendered: they cannot use it to win, and watching
+   * the stragglers flail is half the fun. Still-racing players see null.
+   */
+  current: string | null
 }
 
 export interface LobbyView {
@@ -30,7 +36,7 @@ export interface LobbyView {
 export type ClientMessage =
   | { type: 'settings'; start: string; target: string }
   | { type: 'start' }
-  | { type: 'progress'; clicks: number }
+  | { type: 'progress'; clicks: number; current: string }
   | { type: 'finish'; clicks: number; durationMs: number; path: string[] }
   | { type: 'surrender'; clicks: number; path: string[] }
   | { type: 'rematch' }
