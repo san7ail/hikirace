@@ -122,16 +122,14 @@ export function useLobby(code: string | null, name: string): Lobby {
     setView(null)
   }, [])
 
-  return {
-    view,
-    you,
-    connection,
-    error,
-    go,
-    send,
-    clearGo: useCallback(() => setGo(null), []),
-    leave,
-  }
+  const clearGo = useCallback(() => setGo(null), [])
+
+  // A stable object: consumers memoise callbacks against it, and a fresh
+  // identity on every websocket tick would invalidate all of them.
+  return useMemo(
+    () => ({ view, you, connection, error, go, send, clearGo, leave }),
+    [view, you, connection, error, go, send, clearGo, leave],
+  )
 }
 
 export async function createLobby(): Promise<string> {

@@ -32,7 +32,7 @@ export default function App() {
   const [initialCode] = useState(codeFromUrl)
 
   const lobby = useLobby(lobbyCode, playerName)
-  const { go, clearGo } = lobby
+  const { go, clearGo, send: sendToLobby } = lobby
 
   const rememberName = (name: string) => {
     setPlayerName(name)
@@ -112,7 +112,7 @@ export default function App() {
         if (current.multi) {
           const titles = path.map((step) => step.title)
           const clicks = Math.max(0, path.length - 1)
-          lobby.send(
+          sendToLobby(
             outcome === 'won'
               ? { type: 'finish', clicks, durationMs, path: titles }
               : { type: 'surrender', clicks, path: titles },
@@ -126,12 +126,12 @@ export default function App() {
         }
       })
     },
-    [lobby],
+    [sendToLobby],
   )
 
   const reportProgress = useCallback(
-    (clicks: number) => lobby.send({ type: 'progress', clicks }),
-    [lobby],
+    (clicks: number) => sendToLobby({ type: 'progress', clicks }),
+    [sendToLobby],
   )
 
   switch (phase.name) {

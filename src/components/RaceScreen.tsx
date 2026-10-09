@@ -32,6 +32,15 @@ export function RaceScreen({ start, target, onFinish, opponents, you, onProgress
   // current route without being rebuilt (and re-firing) on every step.
   const pathRef = useRef<Step[]>([{ title: start, at: 0 }])
 
+  // Same reason, for the callbacks from above: in a multiplayer race every
+  // websocket update re-renders the parent and hands us fresh function
+  // identities. If `load` depended on those, the mount effect below would
+  // re-run and yank the player back to the starting article.
+  const onFinishRef = useRef(onFinish)
+  onFinishRef.current = onFinish
+  const onProgressRef = useRef(onProgress)
+  onProgressRef.current = onProgress
+
   useNavigationLock(running)
 
   const load = useCallback(
@@ -52,13 +61,13 @@ export function RaceScreen({ start, target, onFinish, opponents, you, onProgress
           const nextPath = [...pathRef.current, { title: next.title, at }]
           pathRef.current = nextPath
           setPath(nextPath)
-          onProgress?.(nextPath.length - 1)
+          onProgressRef.current?.(nextPath.length - 1)
 
           // MediaWiki has already followed redirects, so landing on
           // "Urho Kekkonen" counts as reaching "Urho Kaleva Kekkonen".
           if (sameArticle(next.title, target)) {
             setRunning(false)
-            onFinish('won', nextPath, at)
+            onFinishRef.current('won', nextPath, at)
           }
         })
         .catch((err) => {
@@ -71,7 +80,7 @@ export function RaceScreen({ start, target, onFinish, opponents, you, onProgress
 
       return () => controller.abort()
     },
-    [startedAt, target, onFinish, onProgress],
+    [startedAt, target],
   )
 
   useEffect(() => load(start, false), [load, start])
@@ -79,7 +88,7 @@ export function RaceScreen({ start, target, onFinish, opponents, you, onProgress
   const surrender = () => {
     if (!running) return
     setRunning(false)
-    onFinish('surrendered', pathRef.current, Date.now() - startedAt)
+    onFinishRef.current('surrendered', pathRef.current, Date.now() - startedAt)
   }
 
   const steps = path.length - 1
