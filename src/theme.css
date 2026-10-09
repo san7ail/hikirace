@@ -530,3 +530,59 @@ input { font: inherit; }
   font-size: 13px;
   color: var(--muted);
 }
+/* ---------- lobby time-waster ---------- */
+
+.snake { margin: 30px 0 4px; }
+
+.snake-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.snake-head h3 { margin: 0; }
+
+.snake-score {
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.snake-score small { font-size: 13px; color: var(--muted); margin-left: 6px; }
+
+.snake-board { position: relative; }
+
+.snake-board canvas {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  border: 2px solid var(--blue);
+  background: var(--bg-field);
+  touch-action: none;
+  cursor: pointer;
+}
+
+.snake-board canvas:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+.snake-overlay {
+  position: absolute;
+  inset: 0;
+  max-width: 320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  background: color-mix(in srgb, var(--bg-field) 86%, transparent);
+  color: var(--blue);
+  text-align: center;
+  padding: 10px;
+}
+
+.snake-overlay strong { font-size: 19px; }
+.snake-overlay small { font-size: 13px; color: var(--ink); }
