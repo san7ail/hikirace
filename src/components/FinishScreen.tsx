@@ -5,6 +5,7 @@ import type { LobbyView } from '../../shared/protocol'
 import { Kekkonen } from './Kekkonen'
 import { Logo } from './Logo'
 import { Scoreboard } from './Scoreboard'
+import { SnakeGame } from './SnakeGame'
 
 interface Props {
   result: RaceResult
@@ -63,8 +64,12 @@ export function FinishScreen({
             <p className="note" style={{ textAlign: 'left', marginBottom: 26 }}>
               {stillRacing > 0
                 ? 'Taulukko päivittyy kun muut pääsevät perille.'
-                : 'Kaikki maalissa.'}
+                : 'Kaikki maalissa. Isäntä voi aloittaa uusinnan.'}
             </p>
+
+            {/* This screen is a waiting room too: for the stragglers, then
+                for the host to call a rematch. */}
+            <SnakeGame />
           </>
         )}
 

@@ -57,7 +57,8 @@ function freshGame(): Game {
  */
 export function SnakeGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const gameRef = useRef<Game>(freshGame())
+  const gameRef = useRef<Game | null>(null)
+  gameRef.current ??= freshGame()
   const frameRef = useRef<number>(0)
   const statusRef = useRef<Status>('idle')
 
@@ -85,7 +86,7 @@ export function SnakeGame() {
 
     const size = canvas.width / (window.devicePixelRatio || 1)
     const cell = size / GRID
-    const game = gameRef.current
+    const game = gameRef.current!
 
     ctx.save()
     ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1)
@@ -127,7 +128,7 @@ export function SnakeGame() {
   }, [])
 
   const step = useCallback(() => {
-    const game = gameRef.current
+    const game = gameRef.current!
 
     const turn = game.queue.shift()
     if (turn) game.dir = turn
@@ -166,7 +167,7 @@ export function SnakeGame() {
   useEffect(() => {
     const loop = (now: number) => {
       frameRef.current = requestAnimationFrame(loop)
-      const game = gameRef.current
+      const game = gameRef.current!
 
       if (statusRef.current === 'running') {
         if (!game.last) game.last = now
@@ -220,7 +221,7 @@ export function SnakeGame() {
   }, [setPhase])
 
   const steer = useCallback((dir: Point) => {
-    const game = gameRef.current
+    const game = gameRef.current!
     const last = game.queue.at(-1) ?? game.dir
     // No instant 180s — that would be an unavoidable self-collision.
     if (last.x === -dir.x && last.y === -dir.y) return
