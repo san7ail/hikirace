@@ -5,14 +5,20 @@ import { useNavigationLock } from '../hooks/useNavigationLock'
 import { sameArticle } from '../lib/titles'
 import type { Article, Step } from '../types'
 import { ArticleView } from './ArticleView'
+import { rank } from './Scoreboard'
+import type { PlayerView } from '../../shared/protocol'
 
 interface Props {
   start: string
   target: string
   onFinish: (outcome: 'won' | 'surrendered', path: Step[], durationMs: number) => void
+  /** Present only in a multiplayer race. */
+  opponents?: PlayerView[]
+  you?: string
+  onProgress?: (clicks: number) => void
 }
 
-export function RaceScreen({ start, target, onFinish }: Props) {
+export function RaceScreen({ start, target, onFinish, opponents, you, onProgress }: Props) {
   const [startedAt] = useState(() => Date.now())
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
@@ -46,6 +52,7 @@ export function RaceScreen({ start, target, onFinish }: Props) {
           const nextPath = [...pathRef.current, { title: next.title, at }]
           pathRef.current = nextPath
           setPath(nextPath)
+          onProgress?.(nextPath.length - 1)
 
           // MediaWiki has already followed redirects, so landing on
           // "Urho Kekkonen" counts as reaching "Urho Kaleva Kekkonen".
@@ -64,7 +71,7 @@ export function RaceScreen({ start, target, onFinish }: Props) {
 
       return () => controller.abort()
     },
-    [startedAt, target, onFinish],
+    [startedAt, target, onFinish, onProgress],
   )
 
   useEffect(() => load(start, false), [load, start])
@@ -98,6 +105,28 @@ export function RaceScreen({ start, target, onFinish }: Props) {
           </button>
         </div>
       </header>
+
+      {opponents && opponents.length > 1 && (
+        <div className="race-field">
+          {rank(opponents).map((player) => (
+            <span
+              key={player.id}
+              className="pill"
+              data-you={player.id === you}
+              data-done={player.finishedAt !== null}
+            >
+              {player.name}
+              <b>
+                {player.finishedAt !== null
+                  ? formatDuration(player.finishedAt)
+                  : player.surrendered
+                    ? 'luovutti'
+                    : player.clicks}
+              </b>
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="race-body">
         {error ? (

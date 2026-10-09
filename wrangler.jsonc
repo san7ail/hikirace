@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hikirace",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    // The Vite build is served by the same Worker that runs the lobbies, so
+    // there is only one thing to deploy and no cross-origin setup.
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "LOBBY", "class_name": "LobbyRoom" }]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      // SQLite-backed Durable Objects are the ones available on the free plan.
+      "new_sqlite_classes": ["LobbyRoom"]
+    }
+  ],
+  "observability": { "enabled": true }
+}

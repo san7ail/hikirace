@@ -1,19 +1,30 @@
 import { formatDuration } from '../hooks/useElapsed'
 import { articleUrl } from '../lib/titles'
 import type { RaceResult } from '../types'
+import type { LobbyView } from '../../shared/protocol'
 import { Kekkonen } from './Kekkonen'
 import { Logo } from './Logo'
+import { Scoreboard } from './Scoreboard'
 
 interface Props {
   result: RaceResult
   playerName: string
   onRematch: () => void
   onNewRace: () => void
+  /** Present in a multiplayer race: live standings while others still run. */
+  lobby?: LobbyView | null
+  you?: string
+  canRematch?: boolean
 }
 
-export function FinishScreen({ result, playerName, onRematch, onNewRace }: Props) {
+export function FinishScreen({
+  result, playerName, onRematch, onNewRace, lobby, you, canRematch = true,
+}: Props) {
   const won = result.outcome === 'won'
   const clicks = Math.max(0, result.path.length - 1)
+  const stillRacing = lobby
+    ? lobby.players.filter((p) => p.finishedAt === null && !p.surrendered).length
+    : 0
 
   return (
     <div className="screen">
@@ -43,6 +54,20 @@ export function FinishScreen({ result, playerName, onRematch, onNewRace }: Props
           </div>
         </div>
 
+        {lobby && (
+          <>
+            <h3 style={{ marginTop: 0 }}>
+              Tilanne{stillRacing > 0 && ` — ${stillRacing} vielä matkalla`}
+            </h3>
+            <Scoreboard players={lobby.players} you={you ?? ''} racing />
+            <p className="note" style={{ textAlign: 'left', marginBottom: 26 }}>
+              {stillRacing > 0
+                ? 'Taulukko päivittyy kun muut pääsevät perille.'
+                : 'Kaikki maalissa.'}
+            </p>
+          </>
+        )}
+
         <h3 style={{ marginTop: 0 }}>Reitti</h3>
         <ol className="path">
           {result.path.map((step, i) => (
@@ -61,11 +86,13 @@ export function FinishScreen({ result, playerName, onRematch, onNewRace }: Props
         </ol>
 
         <div className="row">
-          <button type="button" className="btn btn-ghost" onClick={onRematch}>
-            Uusinta
-          </button>
+          {canRematch && (
+            <button type="button" className="btn btn-ghost" onClick={onRematch}>
+              Uusinta
+            </button>
+          )}
           <button type="button" className="btn" onClick={onNewRace}>
-            Uusi kisa
+            {lobby ? 'Takaisin aulaan' : 'Uusi kisa'}
           </button>
         </div>
       </div>

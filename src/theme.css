@@ -427,3 +427,99 @@ input { font: inherit; }
   .article .infobox, .article .thumb { float: none; margin: 1em 0; max-width: 100%; }
   .brand h1 { font-size: 34px; }
 }
+
+/* ---------- lobby ---------- */
+
+.lobby-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.lobby-head small { display: block; font-weight: 700; }
+
+.lobby-code {
+  display: block;
+  font-size: 36px;
+  letter-spacing: 0.1em;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.matchup {
+  display: grid;
+  gap: 12px;
+  border: 2px solid var(--blue);
+  background: var(--bg-field);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.matchup small { display: block; font-weight: 700; color: var(--muted); }
+.matchup strong { font-size: 18px; color: var(--blue); }
+
+.scoreboard { list-style: none; margin: 0; padding: 0; }
+
+.scoreboard li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 2px solid var(--blue);
+  margin-bottom: -2px;
+  font-weight: 700;
+}
+
+.scoreboard li[data-you='true'] { background: var(--bg-field); }
+.scoreboard li[data-done='true'] .score { color: var(--blue); }
+
+.scoreboard .place { color: var(--muted); min-width: 24px; }
+.scoreboard .who { flex: 1; }
+.scoreboard .score { font-variant-numeric: tabular-nums; }
+
+.tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  font-size: 12px;
+  border: 1.5px solid var(--muted);
+  color: var(--muted);
+  vertical-align: middle;
+}
+
+.tag-you { border-color: var(--blue); color: var(--blue); }
+
+/* live standings strip during a multiplayer race */
+.race-field {
+  position: sticky;
+  top: 72px;
+  z-index: 25;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 22px;
+  background: var(--bg-field);
+  border-bottom: 2px solid var(--blue);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 4px 11px;
+  border: 2px solid var(--blue);
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.pill b { font-variant-numeric: tabular-nums; }
+.pill[data-you='true'] { background: var(--blue); color: var(--bg); }
+.pill[data-done='true'] { border-style: double; border-width: 4px; }
+
+@media (max-width: 720px) {
+  .race-field { top: auto; position: static; padding: 10px 14px; }
+  .lobby-code { font-size: 30px; }
+}
