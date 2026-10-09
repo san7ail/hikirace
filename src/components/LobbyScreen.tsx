@@ -6,6 +6,7 @@ import { sameArticle } from '../lib/titles'
 import { ArticlePicker } from './ArticlePicker'
 import { Logo } from './Logo'
 import { Scoreboard } from './Scoreboard'
+import { SnakeGame } from './SnakeGame'
 
 interface Props {
   lobby: Lobby
@@ -165,6 +166,8 @@ export function LobbyScreen({ lobby, onLeave }: Props) {
             <p className="race-loading">Odotetaan että isäntä aloittaa kisan…</p>
           </>
         )}
+
+        <SnakeGame />
 
         <p className="note">
           <button
